@@ -1,0 +1,62 @@
+version: '3.9'
+services:
+  evolution:
+    image: atendai/evolution-api:v2.2.3  # Imagem Docker da Evolution API
+    container_name: evolution_api
+    restart: always
+    ports:
+      - "8080:8080"                     # Porta da API exposta
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - AUTHENTICATION_API_KEY=INSIRA_SUA_CHAVE_AQUI   # Chave de API (defina uma segura)
+      - AUTHENTICATION_TYPE=apikey                     # Autenticação via API key
+      - DATABASE_ENABLED=true                          # Habilita uso de banco de dados externo
+      - DATABASE_PROVIDER=postgresql                   # Usa PostgreSQL como SGBD
+      - DATABASE_CONNECTION_URI=postgresql://postgres:SENHA_POSTGRES@postgres:5432/evolution
+      - CACHE_REDIS_ENABLED=true                       # Habilita cache Redis
+      - CACHE_REDIS_URI=redis://redis:6379/1           # URI de conexão do Redis (db 1)
+      - LOG_LEVEL=ERROR                                # Nível de log reduzido (opcional)
+    volumes:
+      - evolution_instances:/evolution/instances       # Persistência das instâncias (sessões WhatsApp)
+      - evolution_store:/evolution/store               # Persistência de dados locais (cache/mídia)
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: evolution_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=SENHA_POSTGRES               # Defina uma senha forte para o Postgres
+      - POSTGRES_DB=evolution                          # Banco de dados utilizado pela Evolution API
+    volumes:
+      - pgdata:/var/lib/postgresql/data                # Volume para dados do PostgreSQL
+
+  redis:
+    image: redis:alpine
+    container_name: evolution_redis
+    restart: always
+    # (Opcional: configurar requirepass no Redis para adicionAR senha de acesso)
+    volumes:
+      - redisdata:/data                                # Volume para dados do Redis (cache persistente)
+
+  webhook:
+    build: ./webhook
+    container_name: flask_webhook
+    restart: always
+    ports:
+      - "5000:5000"          # expõe endpoint /webhook
+    depends_on:
+      - evolution
+    environment:
+      - API_KEY=${API_KEY}
+      - EV_API_URL=${EV_API_URL}
+      - EV_INSTANCE=${EV_INSTANCE}
+
+
+volumes:
+  evolution_instances:
+  evolution_store:
+  pgdata:
+  redisdata:

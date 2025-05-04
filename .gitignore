@@ -1,0 +1,48 @@
+# Arquivos de ambiente
+
+.env
+
+# Byte-compiled / caches
+
+**pycache**/
+\*.py\[cod]
+\*\$py.class
+
+# Pastas de ambientes virtuais
+
+venv/
+env/
+.venv/
+
+# Logs\*/
+
+logs/
+\*.log
+
+# Docker Compose overrides
+
+docker-compose.override.yml
+
+# Artefatos do Docker
+
+\*.pid
+\*.sock
+
+# VSCode
+
+.vscode/
+
+# IDE JetBrains
+
+.idea/
+
+# Arquivos macOS
+
+.DS\_Store
+
+# Arquivos de sistema
+
+\*.swp
+\*.swo
+
+# Recomendação: mantenha o README, docker-compose.yml e .gitignore no controle de versão
